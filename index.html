@@ -931,11 +931,14 @@
   </footer>
 
   <script>
-    function submitForm(prefix) {
+    const LOOPS_ENDPOINT = 'https://app.loops.so/api/newsletter-form/cmpm51rdt030q0jz8eugz51ud';
+
+    async function submitForm(prefix) {
       const input = document.getElementById(prefix + '-email');
+      const btn = input.parentElement.querySelector('button');
       const form = document.getElementById(prefix + '-form');
       const success = document.getElementById(prefix + '-success');
-      const note = form.nextElementSibling.nextElementSibling;
+      const note = form.nextElementSibling;
 
       if (!input.value || !input.value.includes('@')) {
         input.style.borderColor = '#DC2626';
@@ -943,11 +946,23 @@
         return;
       }
 
-      // Replace this action with your Formspree endpoint or similar
-      // For now, just show the success state
-      form.style.display = 'none';
-      success.classList.add('visible');
-      if (note) note.style.display = 'none';
+      btn.textContent = 'joining...';
+      btn.disabled = true;
+
+      try {
+        const data = new FormData();
+        data.append('newsletter-form-input', input.value);
+        const res = await fetch(LOOPS_ENDPOINT, { method: 'POST', body: data });
+        if (!res.ok) throw new Error('network error');
+        form.style.display = 'none';
+        success.classList.add('visible');
+        if (note) note.style.display = 'none';
+      } catch {
+        btn.textContent = 'try again';
+        btn.disabled = false;
+        input.style.borderColor = '#DC2626';
+        setTimeout(() => input.style.borderColor = '', 1500);
+      }
     }
   </script>
 
